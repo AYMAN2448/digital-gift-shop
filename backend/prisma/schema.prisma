@@ -8,87 +8,90 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(uuid())
-  email            String    @unique
-  passwordHash     String?   // null for google auth
-  googleId         String?   @unique
-  name             String
-  balance          Float     @default(0)
-  referralCode     String    @unique
-  referredBy       String?   // userId
-  role             String    @default("user") // user, admin
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  orders           Order[]
+  id                  String               @id @default(uuid())
+  email               String               @unique
+  passwordHash        String?
+  googleId            String?              @unique
+  name                String
+  balance             Float                @default(0)
+  referralCode        String               @unique
+  referredBy          String?             // userId of referrer
+  role                String               @default("user") // user, admin
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  orders              Order[]
   balanceTransactions BalanceTransaction[]
-  depositRequests  DepositRequest[]
+  depositRequests     DepositRequest[]
+  referralsGiven      Referral[]           @relation("referrer")
+  referralsReceived   Referral[]           @relation("referred")
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  nameAr      String
-  nameEn      String
-  slug        String   @unique
-  category    String   // google_play, steam, pubg_uc, etc
-  price       Float
-  cost        Float    // تكلفة الشراء من المزود
-  executionMode String @default("api") // api, manual, both
-  isActive    Boolean  @default(true)
-  metadata    Json?    // صور، وصف
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  orders      Order[]
+  id               String            @id @default(uuid())
+  nameAr           String
+  nameEn           String
+  slug             String            @unique
+  category         String
+  price            Float
+  cost             Float
+  executionMode    String            @default("api") // api, manual, both
+  isActive         Boolean           @default(true)
+  metadata         Json?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  orders           Order[]
   productProviders ProductProvider[]
 }
 
 model ApiProvider {
-  id               String   @id @default(uuid())
-  name             String   // GamerBox, G4A
+  id               String            @id @default(uuid())
+  name             String
   baseUrl          String
-  apiKeyEncrypted  String   // تشفير
+  apiKeyEncrypted  String
   webhookSecret    String?
-  isActive         Boolean  @default(true)
-  priority         Int      @default(1) // 1 primary, 2 fallback
-  createdAt        DateTime @default(now())
+  isActive         Boolean           @default(true)
+  priority         Int               @default(1)
+  createdAt        DateTime          @default(now())
   productProviders ProductProvider[]
+  orders           Order[]
 }
 
 model ProductProvider {
-  productId         String
-  providerId        String
+  productId           String
+  providerId          String
   providerProductCode String
-  profitMargin      Float    @default(0)
-  product           Product   @relation(fields: [productId], references: [id])
-  provider          ApiProvider @relation(fields: [providerId], references: [id])
+  profitMargin        Float    @default(0)
+  product             Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  provider            ApiProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
   @@id([productId, providerId])
 }
 
 model Order {
-  id                String   @id @default(uuid())
+  id                String        @id @default(uuid())
   userId            String
   productId         String
-  quantity          Int      @default(1)
+  quantity          Int           @default(1)
   totalAmount       Float
-  paymentMethod     String   // balance, usdt, bank_transfer, ...
-  status            String   @default("pending") // pending, processing, completed, failed, refunded, pending_manual
+  paymentMethod     String
+  status            String        @default("pending")
   executionModeUsed String?
   providerId        String?
   providerResponse  Json?
-  metadata          Json?    // بيانات المستخدم (UID, phone)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  user              User     @relation(fields: [userId], references: [id])
-  product           Product  @relation(fields: [productId], references: [id])
-  provider          ApiProvider? @relation(fields: [providerId], references: [id])
+  metadata          Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  user              User          @relation(fields: [userId], references: [id])
+  product           Product       @relation(fields: [productId], references: [id])
+  provider          ApiProvider?  @relation(fields: [providerId], references: [id])
 }
 
 model BalanceTransaction {
   id          String   @id @default(uuid())
   userId      String
-  amount      Float    // موجب شحن، سالب خصم
+  amount      Float
   balanceAfter Float
   type        String   // deposit, purchase, refund, commission
-  referenceId String?  // orderId or depositRequestId
+  referenceId String?
   reason      String?
   ipAddress   String?
   createdAt   DateTime @default(now())
@@ -99,12 +102,23 @@ model DepositRequest {
   id              String   @id @default(uuid())
   userId          String
   amount          Float
-  paymentMethod   String   // bank_transfer, crypto, vodafone_cash, mada
-  receiptImageUrl String?  // للتحويل البنكي
+  paymentMethod   String
+  receiptImageUrl String?
   status          String   @default("pending") // pending, approved, rejected
   adminNotes      String?
-  metadata        Json?    // حفظ productId و quantity للشراء بعد الشحن
+  metadata        Json?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   user            User     @relation(fields: [userId], references: [id])
 }
+
+model Referral {
+  id              String   @id @default(uuid())
+  referrerId      String
+  referredId      String
+  commissionAmount Float
+  status          String   @default("pending") // pending, paid
+  createdAt       DateTime @default(now())
+  referrer        User     @relation("referrer", fields: [referrerId], references: [id])
+  referred        User     @relation("referred", fields: [referredId], references: [id])
+} 
