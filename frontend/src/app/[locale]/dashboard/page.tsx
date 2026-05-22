@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { auth } from '@/lib/auth'; // سيتم إنشاؤه لاحقاً
 import { BalanceCard } from '@/components/balance/balance-card';
 import { OrdersList } from '@/components/orders/orders-list';
