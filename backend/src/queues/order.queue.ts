@@ -1,4 +1,3 @@
-// backend/src/queues/order.queue.ts
 import { Queue, Worker } from 'bullmq';
 import { redis } from '../config/redis';
 import { processOrderJob } from './workers/order.worker';
