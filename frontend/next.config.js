@@ -2,22 +2,10 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['localhost', 'cdn.example.com'],
+    domains: ['localhost'],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: process.env.NEXT_PUBLIC_API_URL + '/:path*',
-      },
-    ];
-  },
-  // دعم RTL تلقائي
-  i18n: {
-    locales: ['ar', 'en'],
-    defaultLocale: 'ar',
-    localeDetection: false,
-  },
+  // تعطيل i18n الثابت (سنستخدم next-intl فقط)
+  i18n: undefined,
 };
 
 module.exports = nextConfig;
