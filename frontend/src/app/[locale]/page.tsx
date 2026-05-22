@@ -1,15 +1,10 @@
-import { ProductGrid } from '@/components/products/product-grid';
-import { fetchProducts } from '@/lib/api-client';
+'use client';
+import { OneStepCheckout } from '@/components/checkout/one-step-checkout';
+import { useSearchParams } from 'next/navigation';
 
-export default async function HomePage() {
-  const products = await fetchProducts(); // تنفيذها لاحقاً
-  return (
-    <div className="space-y-8">
-      <section className="text-center space-y-4 py-10">
-        <h1 className="text-3xl md:text-5xl font-bold">أسرع شحن للبطاقات والألعاب</h1>
-        <p className="text-muted-foreground">Google Play, Steam, PUBG UC, Free Fire Diamonds والمزيد</p>
-      </section>
-      <ProductGrid products={products} />
-    </div>
-  );
+export default function CheckoutPage() {
+  const searchParams = useSearchParams();
+  const productId = searchParams.get('productId');
+  const quantity = parseInt(searchParams.get('quantity') || '1');
+  return <OneStepCheckout productId={productId} quantity={quantity} />;
 }
