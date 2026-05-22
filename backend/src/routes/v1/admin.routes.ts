@@ -1,4 +1,3 @@
-// backend/src/routes/v1/admin.routes.ts
 import { Router } from 'express';
 import { adminMiddleware } from '../../middleware/auth.middleware';
 import { updateOrderStatus, getPendingOrders, updateProductExecutionMode } from '../../controllers/adminController';
