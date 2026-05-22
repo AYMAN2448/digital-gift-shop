@@ -1,4 +1,3 @@
-// backend/src/services/balanceService.ts
 import { prisma } from '../config/database';
 
 export const balanceService = {
@@ -17,17 +16,40 @@ export const balanceService = {
       return result;
     });
   },
-  async refund(userId: string, amount: number, orderId: string) {
+
+  async refund(userId: string, amount: number, orderId: string, reason?: string) {
     return await prisma.$transaction(async (tx) => {
-      await tx.user.update({
+      const user = await tx.user.update({
         where: { id: userId },
         data: { balance: { increment: amount } }
       });
-      const user = await tx.user.findUnique({ where: { id: userId } });
       await tx.balanceTransaction.create({
         data: {
-          userId, amount, balanceAfter: user!.balance,
-          type: 'refund', referenceId: orderId, reason: 'Provider failed'
+          userId,
+          amount,
+          balanceAfter: user.balance,
+          type: 'refund',
+          referenceId: orderId,
+          reason: reason || 'Provider failed'
+        }
+      });
+    });
+  },
+
+  async credit(userId: string, amount: number, referenceId: string, type: string, ip?: string) {
+    return await prisma.$transaction(async (tx) => {
+      const user = await tx.user.update({
+        where: { id: userId },
+        data: { balance: { increment: amount } }
+      });
+      await tx.balanceTransaction.create({
+        data: {
+          userId,
+          amount,
+          balanceAfter: user.balance,
+          type,
+          referenceId,
+          ipAddress: ip
         }
       });
     });
