@@ -1,20 +1,21 @@
-import './globals.css';
-import { Providers } from '@/components/providers';
-import { getLocale } from 'next-intl/server';
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
+import { notFound } from 'next/navigation';
 
-export const metadata = {
-  title: 'GiftShop | شحن وبطاقات رقمية',
-  description: 'أسرع منصة لشراء بطاقات Google Play, Steam, وشحن الألعاب',
-};
+const locales = ['ar', 'en'];
+export async function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const locale = await getLocale();
-  const dir = locale === 'ar' ? 'rtl' : 'ltr';
+export default function LocaleLayout({ children, params }: { children: React.ReactNode; params: { locale: string } }) {
+  if (!locales.includes(params.locale)) notFound();
   return (
-    <html lang={locale} dir={dir} suppressHydrationWarning>
-      <body>
-        <Providers>{children}</Providers>
-      </body>
-    </html>
+    <>
+      <Header />
+      <main className="min-h-screen container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        {children}
+      </main>
+      <Footer />
+    </>
   );
 }
