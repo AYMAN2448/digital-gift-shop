@@ -1,10 +1,16 @@
 import Redis from 'ioredis';
 
-export const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-  maxRetriesPerRequest: null, // مهم جداً لـ BullMQ
+const redisUrl = process.env.REDIS_URL;
+if (!redisUrl) {
+  console.error('❌ REDIS_URL environment variable is not set!');
+  process.exit(1);
+}
+
+export const redis = new Redis(redisUrl, {
+  maxRetriesPerRequest: null,
   enableReadyCheck: false,
   lazyConnect: true,
 });
 
-redis.on('connect', () => console.log('Redis connected'));
-redis.on('error', (err) => console.error('Redis error:', err));
+redis.on('connect', () => console.log('✅ Redis connected'));
+redis.on('error', (err) => console.error('❌ Redis error:', err));
