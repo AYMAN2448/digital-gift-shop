@@ -2,13 +2,13 @@ import { prisma } from '../config/database';
 
 export const balanceService = {
   async debitWithLock(userId: string, amount: number, callback: (user: any) => Promise<any>) {
-    return await prisma.$transaction(async (tx) => {
+    return await prisma.$transaction(async (tx: any) => {
       const user = await tx.user.findUnique({
         where: { id: userId },
         select: { id: true, balance: true }
       });
       if (!user || user.balance < amount) throw new Error('Insufficient balance');
-      const updatedUser = await tx.user.update({
+      await tx.user.update({
         where: { id: userId },
         data: { balance: { decrement: amount } }
       });
@@ -18,7 +18,7 @@ export const balanceService = {
   },
 
   async refund(userId: string, amount: number, orderId: string, reason?: string) {
-    return await prisma.$transaction(async (tx) => {
+    return await prisma.$transaction(async (tx: any) => {
       const user = await tx.user.update({
         where: { id: userId },
         data: { balance: { increment: amount } }
@@ -37,7 +37,7 @@ export const balanceService = {
   },
 
   async credit(userId: string, amount: number, referenceId: string, type: string, ip?: string) {
-    return await prisma.$transaction(async (tx) => {
+    return await prisma.$transaction(async (tx: any) => {
       const user = await tx.user.update({
         where: { id: userId },
         data: { balance: { increment: amount } }
