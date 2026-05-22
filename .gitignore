@@ -1,0 +1,42 @@
+
+### `.gitignore` - المسار: `/.gitignore`
+```gitignore
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Env
+.env
+.env.local
+.env*.local
+
+# Build
+dist/
+build/
+out/
+.next/
+.vercel
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Prisma
+*.db
+*.db-journal
+
+# Redis / BullMQ
+dump.rdb
+
+# Docker
+*.pid
