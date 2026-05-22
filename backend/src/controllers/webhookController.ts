@@ -1,17 +1,16 @@
-// backend/src/controllers/webhookController.ts
 import { Request, Response } from 'express';
 import { prisma } from '../config/database';
 import { balanceService } from '../services/balanceService';
 
 export const providerWebhook = async (req: Request, res: Response) => {
-  const { orderId, status, transactionId, error } = req.body;
+  const { orderId, status, error } = req.body;
   const order = await prisma.order.findUnique({ where: { id: orderId } });
   if (!order) return res.status(404).send('Order not found');
   if (status === 'completed') {
-    await prisma.order.update({ where: { id: orderId }, data: { status: 'completed', providerResponse: { transactionId } } });
+    await prisma.order.update({ where: { id: orderId }, data: { status: 'completed' } });
   } else if (status === 'failed') {
-    await balanceService.refund(order.userId, order.totalAmount, order.id, error || 'Provider failed');
-    await prisma.order.update({ where: { id: orderId }, data: { status: 'failed', providerResponse: { error } } });
+    await balanceService.refund(order.userId, order.totalAmount, order.id, error);
+    await prisma.order.update({ where: { id: orderId }, data: { status: 'failed' } });
   }
   res.sendStatus(200);
 };
@@ -23,16 +22,11 @@ export const cryptoWebhook = async (req: Request, res: Response) => {
     if (depositReq && depositReq.status === 'pending') {
       await balanceService.credit(depositReq.userId, depositReq.amount, depositReq.id, 'deposit', req.ip);
       await prisma.depositRequest.update({ where: { id: order_id }, data: { status: 'approved' } });
-      // إذا كان الـ metadata يحوي طلب شراء، أنشئ الطلب تلقائياً
-      if (depositReq.metadata && (depositReq.metadata as any).action === 'purchase') {
-        // ... إنشاء طلب شراء باستخدام الرصيد
-      }
     }
   }
   res.sendStatus(200);
 };
 
 export const vodafoneWebhook = async (req: Request, res: Response) => {
-  // مشابه للـ crypto
   res.sendStatus(200);
-};
+}; 
