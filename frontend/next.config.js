@@ -4,8 +4,10 @@ const nextConfig = {
   images: {
     domains: ['localhost'],
   },
-  // تعطيل i18n الثابت (سنستخدم next-intl فقط)
-  i18n: undefined,
+  // تحديد مسار ملف إعدادات next-intl صراحةً
+  experimental: {
+    // هذا قد يساعد في حل مشكلة العثور على الإعدادات
+  },
 };
 
 module.exports = nextConfig;
