@@ -29,4 +29,4 @@ export const cryptoWebhook = async (req: Request, res: Response) => {
 
 export const vodafoneWebhook = async (req: Request, res: Response) => {
   res.sendStatus(200);
-}; 
+};
